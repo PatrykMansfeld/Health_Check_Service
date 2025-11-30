@@ -1,0 +1,35 @@
+name: CI - Build & Test Health Check Service
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    - name: Build Docker image
+      run: docker build -t health-check-service:latest .
+
+    - name: Run container
+      run: |
+        docker run -d -p 8080:8080 --name health-check-service health-check-service:latest
+        sleep 5
+
+    - name: Test /health endpoint
+      run: curl -f http://localhost:8080/health
+
+    - name: Test /info endpoint
+      run: curl -f http://localhost:8080/info
+
+    - name: Stop and remove container
+      run: |
+        docker stop health-check-service
+        docker rm health-check-service
