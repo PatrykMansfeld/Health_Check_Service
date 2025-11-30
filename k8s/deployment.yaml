@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: health-check-deployment
+  labels:
+    app: health-check-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: health-check-service
+  template:
+    metadata:
+      labels:
+        app: health-check-service
+    spec:
+      containers:
+      - name: health-check-container
+        image: health-check-service
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+        env:
+        - name: APP_ENV
+          valueFrom:
+            configMapKeyRef:
+              name: health-check-config
+              key: APP_ENV
